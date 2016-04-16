@@ -12,12 +12,18 @@ using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Tv;
 
 namespace NzbDrone.Core.Extras
 {
-    public class ExtraService : IHandle<MediaCoversUpdatedEvent>,
-                                IHandle<EpisodeImportedEvent>,
+    public interface IExtraService
+    {
+        void ImportExtraFiles(LocalEpisode localEpisode, EpisodeFile episodeFile, bool isReadOnly);
+    }
+
+    public class ExtraService : IExtraService,
+                                IHandle<MediaCoversUpdatedEvent>,
                                 IHandle<EpisodeFolderCreatedEvent>,
                                 IHandle<SeriesRenamedEvent>
     {
@@ -43,6 +49,54 @@ namespace NzbDrone.Core.Extras
             _logger = logger;
         }
 
+        public void ImportExtraFiles(LocalEpisode localEpisode, EpisodeFile episodeFile, bool isReadOnly)
+        {
+            var series = localEpisode.Series;
+
+            foreach (var extraFileManager in _extraFileManagers)
+            {
+                extraFileManager.CreateAfterEpisodeImport(series, episodeFile);
+            }
+
+            var sourcePath = localEpisode.Path;
+            var sourceFolder = _diskProvider.GetParentFolder(sourcePath);
+            var sourceFileName = Path.GetFileNameWithoutExtension(sourcePath);
+            var files = _diskProvider.GetFiles(sourceFolder, SearchOption.TopDirectoryOnly);
+
+            var wantedExtensions = _configService.ExtraFileExtensions.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                                     .Select(e => e.Trim(' ', '.'))
+                                                                     .ToList();
+
+            var matchingFilenames = files.Where(f => Path.GetFileNameWithoutExtension(f).StartsWith(sourceFileName));
+
+            foreach (var matchingFilename in matchingFilenames)
+            {
+                var matchingExtension = wantedExtensions.FirstOrDefault(e => matchingFilename.EndsWith(e));
+
+                if (matchingExtension == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    foreach (var extraFileManager in _extraFileManagers)
+                    {
+                        var extraFile = extraFileManager.Import(series, episodeFile, matchingFilename, matchingExtension, isReadOnly);
+
+                        if (extraFile != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.WarnException("Failed to import extra file: " + matchingFilename, ex);
+                }
+            }
+        }
+
         public void Handle(MediaCoversUpdatedEvent message)
         {
             var series = message.Series;
@@ -51,58 +105,6 @@ namespace NzbDrone.Core.Extras
             foreach (var extraFileManager in _extraFileManagers)
             {
                 extraFileManager.CreateAfterSeriesScan(series, episodeFiles);
-            }
-        }
-
-        public void Handle(EpisodeImportedEvent message)
-        {
-            var series = message.EpisodeInfo.Series;
-            var episodeFile = message.ImportedEpisode;
-
-            foreach (var extraFileManager in _extraFileManagers)
-            {
-                extraFileManager.CreateAfterEpisodeImport(series, episodeFile);
-            }
-
-            if (message.NewDownload)
-            {        
-                var sourcePath = message.EpisodeInfo.Path;
-                var sourceFolder = _diskProvider.GetParentFolder(sourcePath);
-                var sourceFileName = Path.GetFileNameWithoutExtension(sourcePath);
-                var files = _diskProvider.GetFiles(sourceFolder, SearchOption.TopDirectoryOnly);
-
-                var wantedExtensions = _configService.ExtraFileExtensions.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)
-                                                                         .Select(e => e.Trim(' ', '.'))
-                                                                         .ToList();
-
-                var matchingFilenames = files.Where(f => Path.GetFileNameWithoutExtension(f).StartsWith(sourceFileName));
-
-                foreach (var matchingFilename in matchingFilenames)
-                {
-                    var matchingExtension = wantedExtensions.FirstOrDefault(e => matchingFilename.EndsWith(e));
-
-                    if (matchingExtension == null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        foreach (var extraFileManager in _extraFileManagers)
-                        {
-                            var extraFile = extraFileManager.Import(series, episodeFile, matchingFilename, matchingExtension, message.IsReadOnly);
-
-                            if (extraFile != null)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.WarnException("Failed to import extra file: " + matchingFilename, ex);
-                    }
-                }
             }
         }
 

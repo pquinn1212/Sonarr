@@ -48,10 +48,12 @@ namespace NzbDrone.Core.Extras
             _logger.Debug("Looking for existing extra files in {0}", series.Path);
 
             var filesOnDisk = _diskProvider.GetFiles(series.Path, SearchOption.AllDirectories);
-            var possibleExtraFiles = filesOnDisk.Where(c => !MediaFileExtensions.Extensions.Contains(Path.GetExtension(c).ToLower()) && !c.StartsWith(Path.Combine(series.Path, "EXTRAS"))).ToList();
+            var possibleExtraFiles = filesOnDisk.Where(c => !MediaFileExtensions.Extensions.Contains(Path.GetExtension(c).ToLower()) &&
+                                                            !c.StartsWith(Path.Combine(series.Path, "EXTRAS"))).ToList();
 
             var filteredFiles = possibleExtraFiles;
 
+            // TODO: Instead of filtering we should check if the files could be treated as another extra file type
             foreach (var extraFileManager in _extraFileManagers)
             {
                 filteredFiles = extraFileManager.FilterExistingFiles(series, possibleExtraFiles);
