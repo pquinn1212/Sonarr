@@ -165,7 +165,7 @@ namespace NzbDrone.Core.Extras.Metadata
                             }
                             catch (Exception ex)
                             {
-                                _logger.WarnException("Unable to move metadata file: " + existingFileName, ex);
+                                _logger.Warn(ex, "Unable to move metadata file: {0}", existingFileName);
                             }
                         }
                     }

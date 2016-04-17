@@ -92,7 +92,7 @@ namespace NzbDrone.Core.Extras
                 }
                 catch (Exception ex)
                 {
-                    _logger.WarnException("Failed to import extra file: " + matchingFilename, ex);
+                    _logger.Warn(ex, "Failed to import extra file: {0}", matchingFilename);
                 }
             }
         }

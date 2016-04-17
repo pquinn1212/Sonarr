@@ -66,21 +66,21 @@ namespace NzbDrone.Core.Extras.Subtitles
 
                 foreach (var extraFile in extraFilesForEpisodeFile)
                 {
-                    var existingFilename = Path.Combine(series.Path, extraFile.RelativePath);
-                    var extension = Path.GetExtension(existingFilename).TrimStart('.');
+                    var existingFileName = Path.Combine(series.Path, extraFile.RelativePath);
+                    var extension = Path.GetExtension(existingFileName).TrimStart('.');
                     var newFileName = Path.ChangeExtension(Path.Combine(series.Path, episodeFile.RelativePath), extension);
 
-                    if (!newFileName.PathEquals(existingFilename))
+                    if (!newFileName.PathEquals(existingFileName))
                     {
                         try
                         {
-                            _diskProvider.MoveFile(existingFilename, newFileName);
+                            _diskProvider.MoveFile(existingFileName, newFileName);
                             extraFile.RelativePath = series.Path.GetRelativePath(newFileName);
                             movedFiles.Add(extraFile);
                         }
                         catch (Exception ex)
                         {
-                            _logger.WarnException("Unable to move subtitle file: " + existingFilename, ex);
+                            _logger.Warn(ex, "Unable to move subtitle file: {0}", existingFileName);
                         }
                     }
                 }
