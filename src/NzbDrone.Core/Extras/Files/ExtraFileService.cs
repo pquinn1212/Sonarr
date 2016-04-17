@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
-using NzbDrone.Common;
 using NzbDrone.Common.Disk;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Events;
@@ -21,6 +20,7 @@ namespace NzbDrone.Core.Extras.Files
         void Upsert(TExtraFile extraFile);
         void Upsert(List<TExtraFile> extraFiles);
         void Delete(int id);
+        void DeleteMany(IEnumerable<int> ids);
     }
 
     public abstract class ExtraFileService<TExtraFile> : IExtraFileService<TExtraFile>,
@@ -83,6 +83,11 @@ namespace NzbDrone.Core.Extras.Files
         public void Delete(int id)
         {
             _repository.Delete(id);
+        }
+
+        public void DeleteMany(IEnumerable<int> ids)
+        {
+            _repository.DeleteMany(ids);
         }
 
         public void HandleAsync(SeriesDeletedEvent message)

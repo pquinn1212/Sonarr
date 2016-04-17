@@ -9,22 +9,23 @@ using NzbDrone.Core.Tv;
 
 namespace NzbDrone.Core.Extras.Subtitles
 {
-    public class ExistingSubtitleImporter : IImportExistingExtraFiles
+    public class ExistingSubtitleImporter : ImportExistingExtraFilesBase<SubtitleFile>
     {
-        private readonly ISubtitleFileService _subtitleFileService;
+        private readonly IExtraFileService<SubtitleFile> _subtitleFileService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
 
-        public ExistingSubtitleImporter(ISubtitleFileService subtitleFileService,
+        public ExistingSubtitleImporter(IExtraFileService<SubtitleFile> subtitleFileService,
                                         IParsingService parsingService,
                                         Logger logger)
+            : base (subtitleFileService)
         {
             _subtitleFileService = subtitleFileService;
             _parsingService = parsingService;
             _logger = logger;
         }
 
-        public int Order
+        public override int Order
         {
             get
             {
@@ -32,11 +33,12 @@ namespace NzbDrone.Core.Extras.Subtitles
             }
         }
 
-        public IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk, List<string> importedFiles)
         {
             var subtitleFiles = new List<SubtitleFile>();
+            var filteredFiles = FilterAndClean(series, filesOnDisk, importedFiles);
 
-            foreach (var possibleSubtitleFile in filesOnDisk)
+            foreach (var possibleSubtitleFile in filteredFiles)
             {
                 var extension = Path.GetExtension(possibleSubtitleFile);
 

@@ -18,7 +18,6 @@ namespace NzbDrone.Core.Extras.Files
         IEnumerable<ExtraFile> CreateAfterEpisodeImport(Series series, string seriesFolder, string seasonFolder);
         IEnumerable<ExtraFile> MoveFilesAfterRename(Series series, List<EpisodeFile> episodeFiles);
         ExtraFile Import(Series series, EpisodeFile episodeFile, string path, string extension, bool readOnly);
-        List<string> FilterExistingFiles(Series series, List<string> files);
     }
 
     public abstract class ExtraFileManager<TExtraFile> : IManageExtraFiles
@@ -44,18 +43,6 @@ namespace NzbDrone.Core.Extras.Files
         public abstract IEnumerable<ExtraFile> CreateAfterEpisodeImport(Series series, string seriesFolder, string seasonFolder);
         public abstract IEnumerable<ExtraFile> MoveFilesAfterRename(Series series, List<EpisodeFile> episodeFiles);
         public abstract ExtraFile Import(Series series, EpisodeFile episodeFile, string path, string extension, bool readOnly);
-
-        public List<string> FilterExistingFiles(Series series, List<string> files)
-        {
-            var seriesFiles = _extraFileService.GetFilesBySeries(series.Id).Select(f => Path.Combine(series.Path, f.RelativePath)).ToList();
-
-            if (!seriesFiles.Any())
-            {
-                return files;
-            }
-
-            return files.Except(seriesFiles, PathEqualityComparer.Instance).ToList();
-        }
 
         protected TExtraFile ImportFile(Series series, EpisodeFile episodeFile, string path, string extension, bool readOnly)
         {

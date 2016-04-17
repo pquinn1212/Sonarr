@@ -8,22 +8,23 @@ using NzbDrone.Core.Tv;
 
 namespace NzbDrone.Core.Extras.Others
 {
-    public class ExistingOtherExtraImporter : IImportExistingExtraFiles
+    public class ExistingOtherExtraImporter : ImportExistingExtraFilesBase<OtherExtraFile>
     {
-        private readonly IOtherExtraFileService _otherExtraFileService;
+        private readonly IExtraFileService<OtherExtraFile> _otherExtraFileService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
 
-        public ExistingOtherExtraImporter(IOtherExtraFileService otherExtraFileService,
+        public ExistingOtherExtraImporter(IExtraFileService<OtherExtraFile> otherExtraFileService,
                                           IParsingService parsingService,
                                           Logger logger)
+            : base(otherExtraFileService)
         {
             _otherExtraFileService = otherExtraFileService;
             _parsingService = parsingService;
             _logger = logger;
         }
 
-        public int Order
+        public override int Order
         {
             get
             {
@@ -31,11 +32,12 @@ namespace NzbDrone.Core.Extras.Others
             }
         }
 
-        public IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk, List<string> importedFiles)
         {
             var extraFiles = new List<OtherExtraFile>();
+            var filteredFiles = FilterAndClean(series, filesOnDisk, importedFiles);
 
-            foreach (var possibleExtraFile in filesOnDisk)
+            foreach (var possibleExtraFile in filteredFiles)
             {
                 var localEpisode = _parsingService.GetLocalEpisode(possibleExtraFile, series);
 

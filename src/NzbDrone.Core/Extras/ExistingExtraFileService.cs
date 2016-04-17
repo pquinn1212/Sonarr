@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -30,11 +29,6 @@ namespace NzbDrone.Core.Extras
             _logger = logger;
         }
 
-        private List<string> FilterMatchedFiles(List<string> excludedFiles, IEnumerable<ExtraFile> matchedFiles, Series series)
-        {
-            return excludedFiles.Except(matchedFiles.Select(m => Path.Combine(series.Path, m.RelativePath))).ToList();
-        }
-
         public void Handle(SeriesScannedEvent message)
         {
             var series = message.Series;
@@ -52,18 +46,13 @@ namespace NzbDrone.Core.Extras
                                                             !c.StartsWith(Path.Combine(series.Path, "EXTRAS"))).ToList();
 
             var filteredFiles = possibleExtraFiles;
-
-            // TODO: Instead of filtering we should check if the files could be treated as another extra file type
-            foreach (var extraFileManager in _extraFileManagers)
-            {
-                filteredFiles = extraFileManager.FilterExistingFiles(series, possibleExtraFiles);
-            }
+            var importedFiles = new List<string>();
 
             foreach (var existingExtraFileImporter in _existingExtraFileImporters)
             {
-                var importedFiles = existingExtraFileImporter.ProcessFiles(series, filteredFiles);
+                var imported = existingExtraFileImporter.ProcessFiles(series, filteredFiles, importedFiles);
 
-                filteredFiles = FilterMatchedFiles(filteredFiles, importedFiles, series);
+                importedFiles.AddRange(imported.Select(f => Path.Combine(series.Path, f.RelativePath)));
             }
 
             _logger.Info("Found {0} extra files", extraFiles);

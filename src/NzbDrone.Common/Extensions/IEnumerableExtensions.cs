@@ -13,6 +13,24 @@ namespace NzbDrone.Common.Extensions
             return source.Where(element => knownKeys.Add(keySelector(element)));
         }
 
+        public static IEnumerable<TFirst> IntersectBy<TFirst, TSecond, TKey>(this IEnumerable<TFirst> first, Func<TFirst, TKey> firstKeySelector,
+                                                                             IEnumerable<TSecond> second, Func<TSecond, TKey> secondKeySelector,
+                                                                             IEqualityComparer<TKey> keyComparer)
+        {
+            var keys = new HashSet<TKey>(second.Select(secondKeySelector), keyComparer);
+
+            foreach (var element in first)
+            {
+                var key = firstKeySelector(element);
+
+                // Remove the key so we only yield once
+                if (keys.Remove(key))
+                {
+                    yield return element;
+                }
+            }
+        }
+
         public static void AddIfNotNull<TSource>(this List<TSource> source, TSource item)
         {
             if (item == null)

@@ -9,17 +9,18 @@ using NzbDrone.Core.Tv;
 
 namespace NzbDrone.Core.Extras.Metadata
 {
-    public class ExistingMetadataImporter : IImportExistingExtraFiles
+    public class ExistingMetadataImporter : ImportExistingExtraFilesBase<MetadataFile>
     {
-        private readonly IMetadataFileService _metadataFileService;
+        private readonly IExtraFileService<MetadataFile> _metadataFileService;
         private readonly IParsingService _parsingService;
         private readonly Logger _logger;
         private readonly List<IMetadata> _consumers;
 
-        public ExistingMetadataImporter(IMetadataFileService metadataFileService,
+        public ExistingMetadataImporter(IExtraFileService<MetadataFile> metadataFileService,
                                         IEnumerable<IMetadata> consumers,
                                         IParsingService parsingService,
                                         Logger logger)
+        : base(metadataFileService)
         {
             _metadataFileService = metadataFileService;
             _parsingService = parsingService;
@@ -27,7 +28,7 @@ namespace NzbDrone.Core.Extras.Metadata
             _consumers = consumers.ToList();
         }
 
-        public int Order
+        public override int Order
         {
             get
             {
@@ -35,13 +36,14 @@ namespace NzbDrone.Core.Extras.Metadata
             }
         }
 
-        public IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk)
+        public override IEnumerable<ExtraFile> ProcessFiles(Series series, List<string> filesOnDisk, List<string> importedFiles)
         {
             _logger.Debug("Looking for existing metadata in {0}", series.Path);
 
             var metadataFiles = new List<MetadataFile>();
+            var filteredFiles = FilterAndClean(series, filesOnDisk, importedFiles);
 
-            foreach (var possibleMetadataFile in filesOnDisk)
+            foreach (var possibleMetadataFile in filteredFiles)
             {
                 foreach (var consumer in _consumers)
                 {
