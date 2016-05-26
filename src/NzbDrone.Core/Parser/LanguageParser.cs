@@ -17,32 +17,6 @@ namespace NzbDrone.Core.Parser
 
         private static readonly Regex SubtitleLanguageRegex = new Regex(".+?[-_. ](?<iso_code>[a-z]{2,3})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly HashSet<IsoLanguage> IsoLanguages = new HashSet<IsoLanguage>
-                                                                {
-                                                                    new IsoLanguage("en", "eng", Language.English),
-                                                                    new IsoLanguage("fr", "fra", Language.French),
-                                                                    new IsoLanguage("es", "spa", Language.Spanish),
-                                                                    new IsoLanguage("de", "deu", Language.German),
-                                                                    new IsoLanguage("it", "ita", Language.Italian),
-                                                                    new IsoLanguage("da", "dan", Language.Danish),
-                                                                    new IsoLanguage("nl", "nld", Language.Dutch),
-                                                                    new IsoLanguage("ja", "jpn", Language.Japanese),
-//                                                                    new IsoLanguage("", "", Language.Cantonese),
-//                                                                    new IsoLanguage("", "", Language.Mandarin),
-                                                                    new IsoLanguage("ru", "rus", Language.Russian),
-                                                                    new IsoLanguage("pl", "pol", Language.Polish),
-                                                                    new IsoLanguage("vi", "vie", Language.Vietnamese),
-                                                                    new IsoLanguage("sv", "swe", Language.Swedish),
-                                                                    new IsoLanguage("no", "nor", Language.Norwegian),
-                                                                    new IsoLanguage("fi", "fin", Language.Finnish),
-                                                                    new IsoLanguage("tr", "tur", Language.Turkish),
-                                                                    new IsoLanguage("pt", "por", Language.Portuguese),
-//                                                                    new IsoLanguage("nl", "nld", Language.Flemish),
-                                                                    new IsoLanguage("el", "ell", Language.Greek),
-                                                                    new IsoLanguage("ko", "kor", Language.Korean),
-                                                                    new IsoLanguage("hu", "hun", Language.Hungarian)
-                                                                };
-
         public static Language ParseLanguage(string title)
         {
             var lowerTitle = title.ToLower();
@@ -145,23 +119,9 @@ namespace NzbDrone.Core.Parser
                 if (languageMatch.Success)
                 {
                     var isoCode = languageMatch.Groups["iso_code"].Value;
-                    IsoLanguage isoLanguage = null;
+                    var isoLanguage = IsoLanguages.Find(isoCode);
 
-                    if (isoCode.Length == 2)
-                    {
-                        //Lookup ISO639-1 code
-                        isoLanguage = IsoLanguages.SingleOrDefault(l => l.TwoLetterCode == isoCode);
-                    }
-                    else if (isoCode.Length == 3)
-                    {
-                        //Lookup ISO639-2T code
-                        isoLanguage = IsoLanguages.SingleOrDefault(l => l.ThreeLetterCode == isoCode);
-                    }
-
-                    if (isoLanguage != null)
-                    {
-                        return isoLanguage.Language;
-                    }
+                    return isoLanguage?.Language ?? Language.Unknown;
                 }
 
                 Logger.Debug("Unable to parse langauge from subtitle file: {0}", fileName);

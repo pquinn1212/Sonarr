@@ -101,9 +101,9 @@ namespace NzbDrone.Core.Extras.Files
             var episodeFile = message.EpisodeFile;
             var series = _seriesService.GetSeries(message.EpisodeFile.SeriesId);
 
-            foreach (var metadata in _repository.GetFilesByEpisodeFile(episodeFile.Id))
+            foreach (var extra in _repository.GetFilesByEpisodeFile(episodeFile.Id))
             {
-                var path = Path.Combine(series.Path, metadata.RelativePath);
+                var path = Path.Combine(series.Path, extra.RelativePath);
 
                 if (_diskProvider.FileExists(path))
                 {
@@ -111,7 +111,7 @@ namespace NzbDrone.Core.Extras.Files
                 }
             }
 
-            _logger.Debug("Deleting Metadata from database for episode file: {0}", episodeFile);
+            _logger.Debug("Deleting Extra from database for episode file: {0}", episodeFile);
             _repository.DeleteForEpisodeFile(episodeFile.Id);
         }
     }
