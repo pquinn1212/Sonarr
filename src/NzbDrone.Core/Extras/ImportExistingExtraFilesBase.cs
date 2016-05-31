@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Extras
         {
             var seriesFiles = _extraFileService.GetFilesBySeries(series.Id);
 
-            Clean(series, importedFiles, seriesFiles);
+            Clean(series, filesOnDisk, importedFiles, seriesFiles);
 
             return Filter(series, filesOnDisk, importedFiles, seriesFiles);
         }
@@ -38,12 +38,16 @@ namespace NzbDrone.Core.Extras
             return filteredFiles.Except(importedFiles, PathEqualityComparer.Instance).ToList();
         }
 
-        private void Clean(Series series, List<string> importedFiles, List<TExtraFile> seriesFiles)
+        private void Clean(Series series, List<string> filesOnDisk, List<string> importedFiles, List<TExtraFile> seriesFiles)
         {
             var alreadyImportedFileIds = seriesFiles.IntersectBy(f => Path.Combine(series.Path, f.RelativePath), importedFiles, i => i, PathEqualityComparer.Instance)
                 .Select(f => f.Id);
 
+            var deletedFiles = seriesFiles.ExceptBy(f => Path.Combine(series.Path, f.RelativePath), filesOnDisk, i => i, PathEqualityComparer.Instance)
+                .Select(f => f.Id);
+
             _extraFileService.DeleteMany(alreadyImportedFileIds);
+            _extraFileService.DeleteMany(deletedFiles);
         }
     }
 }

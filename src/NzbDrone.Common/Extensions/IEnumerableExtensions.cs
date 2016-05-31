@@ -31,6 +31,26 @@ namespace NzbDrone.Common.Extensions
             }
         }
 
+        public static IEnumerable<TFirst> ExceptBy<TFirst, TSecond, TKey>(this IEnumerable<TFirst> first, Func<TFirst, TKey> firstKeySelector,
+                                                                             IEnumerable<TSecond> second, Func<TSecond, TKey> secondKeySelector,
+                                                                             IEqualityComparer<TKey> keyComparer)
+        {
+            var keys = new HashSet<TKey>(second.Select(secondKeySelector), keyComparer);
+            var matchedKeys = new HashSet<TKey>();
+
+            foreach (var element in first)
+            {
+                var key = firstKeySelector(element);
+
+                if (!keys.Contains(key) && !matchedKeys.Contains(key))
+                {
+                    // Store the key so we only yield once
+                    matchedKeys.Add(key);
+                    yield return element;
+                }
+            }
+        }
+
         public static void AddIfNotNull<TSource>(this List<TSource> source, TSource item)
         {
             if (item == null)

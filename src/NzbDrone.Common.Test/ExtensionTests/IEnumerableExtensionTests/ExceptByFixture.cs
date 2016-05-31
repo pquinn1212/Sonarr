@@ -8,7 +8,7 @@ using NzbDrone.Common.Extensions;
 namespace NzbDrone.Common.Test.ExtensionTests.IEnumerableExtensionTests
 {
     [TestFixture]
-    public class IntersectByFixture
+    public class ExceptByFixture
     {
         public class Object1
         {
@@ -21,7 +21,7 @@ namespace NzbDrone.Common.Test.ExtensionTests.IEnumerableExtensionTests
         }
 
         [Test]
-        public void should_return_empty_when_no_intersections()
+        public void should_return_empty_when_object_with_property_exists_in_both_lists()
         {
             var first = new List<Object1>
                         {
@@ -31,15 +31,15 @@ namespace NzbDrone.Common.Test.ExtensionTests.IEnumerableExtensionTests
 
             var second = new List<Object1>
                         {
-                            new Object1 { Prop1 = "three" },
-                            new Object1 { Prop1 = "four" }
+                            new Object1 { Prop1 = "two" },
+                            new Object1 { Prop1 = "one" }
                         };
 
-            first.IntersectBy(o => o.Prop1, second, o => o.Prop1, StringComparer.InvariantCultureIgnoreCase).Should().BeEmpty();
+            first.ExceptBy(o => o.Prop1, second, o => o.Prop1, StringComparer.InvariantCultureIgnoreCase).Should().BeEmpty();
         }
 
         [Test]
-        public void should_return_objects_with_intersecting_values()
+        public void should_return_objects_that_do_not_have_a_match_in_the_second_list()
         {
             var first = new List<Object1>
                         {
@@ -53,10 +53,11 @@ namespace NzbDrone.Common.Test.ExtensionTests.IEnumerableExtensionTests
                             new Object1 { Prop1 = "four" }
                         };
 
-            var result = first.IntersectBy(o => o.Prop1, second, o => o.Prop1, StringComparer.InvariantCultureIgnoreCase).ToList();
+            var result = first.ExceptBy(o => o.Prop1, second, o => o.Prop1, StringComparer.InvariantCultureIgnoreCase).ToList();
 
             result.Should().HaveCount(1);
-            result.First().Prop1.Should().Be("one");
+            result.First().GetType().Should().Be(typeof (Object1));
+            result.First().Prop1.Should().Be("two");
         }
     }
 }

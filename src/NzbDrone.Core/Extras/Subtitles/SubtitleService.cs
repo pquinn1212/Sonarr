@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Extras.Subtitles
         {
             var subtitleFiles = _subtitleFileService.GetFilesBySeries(series.Id);
 
-            var movedFiles = new List<ExtraFile>();
+            var movedFiles = new List<SubtitleFile>();
 
             foreach (var episodeFile in episodeFiles)
             {
@@ -85,6 +85,8 @@ namespace NzbDrone.Core.Extras.Subtitles
                     }
                 }
             }
+
+            _subtitleFileService.Upsert(movedFiles);
 
             return movedFiles;
         }
@@ -114,7 +116,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                 return fileExtension.TrimStart('.');
             }
 
-            return $"{IsoLanguages.Get(extraFile.Language).TwoLetterCode}.{Path.GetExtension(existingFileName)}".TrimStart('.');
+            return (IsoLanguages.Get(extraFile.Language).TwoLetterCode + fileExtension).TrimStart('.');
         }
     }
 }
