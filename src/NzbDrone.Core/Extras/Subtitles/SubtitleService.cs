@@ -67,7 +67,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                 foreach (var extraFile in extraFilesForEpisodeFile)
                 {
                     var existingFileName = Path.Combine(series.Path, extraFile.RelativePath);
-                    var extension = Path.GetExtension(existingFileName).TrimStart('.');
+                    var extension = GetExtension(extraFile, existingFileName);
                     var newFileName = Path.ChangeExtension(Path.Combine(series.Path, episodeFile.RelativePath), extension);
 
                     if (!newFileName.PathEquals(existingFileName))
@@ -103,6 +103,18 @@ namespace NzbDrone.Core.Extras.Subtitles
             }
 
             return null;
+        }
+
+        private string GetExtension(SubtitleFile extraFile, string existingFileName)
+        {
+            var fileExtension = Path.GetExtension(existingFileName);
+
+            if (extraFile.Language == Language.Unknown)
+            {
+                return fileExtension.TrimStart('.');
+            }
+
+            return $"{IsoLanguages.Get(extraFile.Language).TwoLetterCode}.{Path.GetExtension(existingFileName)}".TrimStart('.');
         }
     }
 }
