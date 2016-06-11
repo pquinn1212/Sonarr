@@ -70,7 +70,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                     var extension = GetExtension(extraFile, existingFileName);
                     var newFileName = Path.ChangeExtension(Path.Combine(series.Path, episodeFile.RelativePath), extension);
 
-                    if (!newFileName.PathEquals(existingFileName))
+                    if (newFileName.PathNotEquals(existingFileName))
                     {
                         try
                         {

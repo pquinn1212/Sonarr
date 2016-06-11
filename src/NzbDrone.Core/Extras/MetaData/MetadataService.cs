@@ -155,7 +155,7 @@ namespace NzbDrone.Core.Extras.Metadata
                         var newFileName = consumer.GetFilenameAfterMove(series, episodeFile, metadataFile);
                         var existingFileName = Path.Combine(series.Path, metadataFile.RelativePath);
 
-                        if (!newFileName.PathEquals(existingFileName))
+                        if (newFileName.PathNotEquals(existingFileName))
                         {
                             try
                             {
@@ -246,7 +246,7 @@ namespace NzbDrone.Core.Extras.Metadata
             if (existingMetadata != null)
             {
                 var existingFullPath = Path.Combine(series.Path, existingMetadata.RelativePath);
-                if (!fullPath.PathEquals(existingFullPath))
+                if (fullPath.PathNotEquals(existingFullPath))
                 {
                     _diskTransferService.TransferFile(existingFullPath, fullPath, TransferMode.Move);
                     existingMetadata.RelativePath = episodeMetadata.RelativePath;
@@ -368,7 +368,7 @@ namespace NzbDrone.Core.Extras.Metadata
                 if (existingMetadata != null)
                 {
                     var existingFullPath = Path.Combine(series.Path, existingMetadata.RelativePath);
-                    if (!fullPath.PathEquals(existingFullPath))
+                    if (fullPath.PathNotEquals(existingFullPath))
                     {
                         _diskTransferService.TransferFile(existingFullPath, fullPath, TransferMode.Move);
                         existingMetadata.RelativePath = image.RelativePath;
