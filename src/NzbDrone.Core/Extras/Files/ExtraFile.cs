@@ -11,5 +11,6 @@ namespace NzbDrone.Core.Extras.Files
         public string RelativePath { get; set; }
         public DateTime Added { get; set; }
         public DateTime LastUpdated { get; set; }
+        public string Extension { get; set; }
     }
 }

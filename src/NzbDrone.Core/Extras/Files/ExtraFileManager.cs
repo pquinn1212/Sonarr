@@ -62,7 +62,8 @@ namespace NzbDrone.Core.Extras.Files
                 SeriesId = series.Id,
                 SeasonNumber = episodeFile.SeasonNumber,
                 EpisodeFileId = episodeFile.Id,
-                RelativePath = series.Path.GetRelativePath(newFileName)
+                RelativePath = series.Path.GetRelativePath(newFileName),
+                Extension = Path.GetExtension(path)
             };
         }
     }

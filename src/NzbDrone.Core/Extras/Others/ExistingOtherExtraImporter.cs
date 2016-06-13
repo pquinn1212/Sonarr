@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -66,7 +67,8 @@ namespace NzbDrone.Core.Extras.Others
                     SeriesId = series.Id,
                     SeasonNumber = localEpisode.SeasonNumber,
                     EpisodeFileId = localEpisode.Episodes.First().EpisodeFileId,
-                    RelativePath = series.Path.GetRelativePath(possibleExtraFile)
+                    RelativePath = series.Path.GetRelativePath(possibleExtraFile),
+                    Extension = Path.GetExtension(possibleExtraFile)
                 };
 
                 extraFiles.Add(extraFile);
