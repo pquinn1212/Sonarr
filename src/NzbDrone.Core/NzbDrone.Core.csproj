@@ -537,13 +537,12 @@
     <Compile Include="Housekeeping\Housekeepers\CleanupCommandQueue.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupAbsolutePathMetadataFiles.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupDuplicateMetadataFiles.cs" />
-    <Compile Include="Housekeeping\Housekeepers\CleanupDuplicateExtraFiles.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedBlacklist.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedEpisodeFiles.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedEpisodes.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedIndexerStatus.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedHistoryItems.cs" />
-    <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedExtraFiles.cs" />
+    <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedMetadataFiles.cs" />
     <Compile Include="Housekeeping\Housekeepers\CleanupOrphanedPendingReleases.cs" />
     <Compile Include="Housekeeping\Housekeepers\DeleteBadMediaCovers.cs" />
     <Compile Include="Housekeeping\Housekeepers\FixFutureRunScheduledTasks.cs" />
