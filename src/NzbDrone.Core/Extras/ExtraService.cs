@@ -51,6 +51,9 @@ namespace NzbDrone.Core.Extras
 
         public void ImportExtraFiles(LocalEpisode localEpisode, EpisodeFile episodeFile, bool isReadOnly)
         {
+            // TODO: Remove
+            // Not importing files yet, testing that parsing is working properly first
+
             var series = localEpisode.Series;
 
             foreach (var extraFileManager in _extraFileManagers)
